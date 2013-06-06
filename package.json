@@ -1,0 +1,35 @@
+{
+  "name": "userific-backendtest",
+  "version": "0.0.0",
+  "description": "Test suite for any userific backend ",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nisaacson/userific-test.git"
+  },
+  "keywords": [
+    "userific"
+  ],
+  "author": "Noah Isaacson",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "1971640378d5209a4b150d20426278ba94d84db3",
+  "bugs": {
+    "url": "https://github.com/nisaacson/userific-test/issues"
+  },
+  "dependencies": {
+    "should": "~1.2.2",
+    "eyespect": "~0.1.8"
+  },
+  "devDependencies": {
+    "userific": "0.0.2",
+    "should": "~1.2.2",
+    "mocha": "~1.10.0"
+  }
+}
