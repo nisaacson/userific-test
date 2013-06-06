@@ -1,5 +1,5 @@
 {
-  "name": "userific-backendtest",
+  "name": "userific-test",
   "version": "0.0.1",
   "description": "Test suite for any userific backend ",
   "main": "index.js",
