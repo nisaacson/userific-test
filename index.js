@@ -13,6 +13,7 @@ module.exports = function(backend, cb) {
       should.not.exist(err)
       should.exist(user)
       user.email.should.eql(userData.email, 'user object has incorrect email')
+      user.password.should.not.eql(userData.password, 'user password failed to be hashed')
       done()
     })
   })
@@ -31,6 +32,7 @@ module.exports = function(backend, cb) {
         }
         should.not.exist(err, 'error authenticating user')
         should.exist(authenticatedUser)
+        authenticatedUser.password.should.not.eql(userData.password, 'user password failed to be hashed')
         authenticatedUser.email.should.eql(userData.email, 'authenticated user has incorrect email')
         done()
       })
@@ -62,6 +64,7 @@ module.exports = function(backend, cb) {
           email: userWithNewEmail.email,
           password: userData.password
         }
+        userWithNewEmail.password.should.not.eql(userData.password, 'user password failed to be hashed')
         backend.authenticate(authData, function(err, authenticatedUser) {
           if (err) {
             inspect(err, 'error in authenticate')
@@ -92,18 +95,19 @@ module.exports = function(backend, cb) {
       }
       backend.changePassword(changeData, function(err, userWithNewPassword) {
         if (err) {
-        inspect(err, 'error in changePassword')
-      }
+          inspect(err, 'error in changePassword')
+        }
         should.not.exist(err, 'error authenticating user')
         should.exist(userWithNewPassword, 'user object not returned from changePassword')
+        userWithNewPassword.password.should.not.eql(newPassword, 'password failed to be hashed in changePassword')
         var authData = {
           email: userData.email,
           password: newPassword
         }
         backend.authenticate(authData, function(err, authenticatedUser) {
           if (err) {
-        inspect(err, 'error in authenticate')
-      }
+            inspect(err, 'error in authenticate')
+          }
           should.not.exist(err, 'error authenticating user with new password')
           should.exist(authenticatedUser, 'user object not returned from authenticate after changing password')
           backend.authenticate(userData, function(err, authenticatedUser) {
