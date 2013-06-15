@@ -50,7 +50,7 @@ module.exports = function(backend, cb) {
       var newEmail = 'newEmail@example.com'
       newEmail.should.not.eql(userData.email)
       var changeData = {
-        email: userData.email,
+        currentEmail: userData.email,
         newEmail: newEmail
       }
       backend.changeEmail(changeData, function(err, userWithNewEmail) {
@@ -90,7 +90,7 @@ module.exports = function(backend, cb) {
       newPassword.should.not.eql(userData.password)
       var changeData = {
         email: userData.email,
-        password: userData.password,
+        currentPassword: userData.password,
         newPassword: newPassword
       }
       backend.changePassword(changeData, function(err, userWithNewPassword) {

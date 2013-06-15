@@ -25,10 +25,10 @@
   },
   "dependencies": {
     "should": "~1.2.2",
-    "eyespect": "~0.1.8"
+    "eyespect": "~0.1.10"
   },
   "devDependencies": {
-    "userific": "0.0.2",
+    "userific": "0.0.4",
     "should": "~1.2.2",
     "mocha": "~1.10.0"
   }
