@@ -13,7 +13,7 @@ module.exports = function(backend, cb) {
       should.not.exist(err)
       should.exist(user)
       user.email.should.eql(userData.email, 'user object has incorrect email')
-      user.password.should.not.eql(userData.password, 'user password failed to be hashed')
+      should.not.exist(user.password, 'password should never be returned to client')
       done()
     })
   })
@@ -32,7 +32,7 @@ module.exports = function(backend, cb) {
         }
         should.not.exist(err, 'error authenticating user')
         should.exist(authenticatedUser)
-        authenticatedUser.password.should.not.eql(userData.password, 'user password failed to be hashed')
+        should.not.exist(authenticatedUser.password, 'password should never be returned to client')
         authenticatedUser.email.should.eql(userData.email, 'authenticated user has incorrect email')
         done()
       })
@@ -64,7 +64,8 @@ module.exports = function(backend, cb) {
           email: userWithNewEmail.email,
           password: userData.password
         }
-        userWithNewEmail.password.should.not.eql(userData.password, 'user password failed to be hashed')
+
+        should.not.exist(userWithNewEmail.password, 'password should never be returned to client')
         backend.authenticate(authData, function(err, authenticatedUser) {
           if (err) {
             inspect(err, 'error in authenticate')
@@ -99,7 +100,7 @@ module.exports = function(backend, cb) {
         }
         should.not.exist(err, 'error authenticating user')
         should.exist(userWithNewPassword, 'user object not returned from changePassword')
-        userWithNewPassword.password.should.not.eql(newPassword, 'password failed to be hashed in changePassword')
+        should.not.exist(userWithNewPassword.password, 'password should never be returned to client')
         var authData = {
           email: userData.email,
           password: newPassword
