@@ -164,6 +164,53 @@ module.exports = function(backend, cb) {
     })
   })
 
+  it('generatePasswordResetToken should be functional for confirmed accounts', function(done) {
+    backend.register(userData, function(err, user) {
+      if (err) {
+        inspect(err, 'error registering user')
+      }
+      should.not.exist(err, 'error registering user')
+      should.exist(user)
+      user.email.should.eql(userData.email, 'user object has incorrect email')
+      var confirmData = {
+        confirmToken: user.confirmToken
+      }
+      backend.confirmEmail(confirmData, function(err, confirmedUser) {
+        should.not.exist(err, 'should get not get error when confirming user with valid confirmToken')
+        should.exist(confirmedUser, 'user object should be returned when confirmEmail succeeds')
+        var generateData = {
+          email: user.email
+        }
+        backend.generatePasswordResetToken(generateData, function(err, resetToken) {
+          should.not.exist(err, 'error generating reset token: ' + JSON.stringify(err))
+          should.exist(resetToken, 'resetToken should be returned as second parameter to callback')
+          done()
+        })
+      })
+    })
+  })
+
+  it('generatePasswordResetToken should return error with reason "unconfirmed" when generating reset token for unconfirmed accounts', function(done) {
+    backend.register(userData, function(err, user) {
+      if (err) {
+        inspect(err, 'error registering user')
+      }
+      should.not.exist(err, 'error registering user')
+      should.exist(user)
+      user.email.should.eql(userData.email, 'user object has incorrect email')
+      var generateData = {
+        email: user.email
+      }
+      backend.generatePasswordResetToken(generateData, function(err, resetToken) {
+        should.exist(err, 'should get error when generating reset token for unconfirmed account')
+        err.reason.should.eql('unconfirmed')
+        should.not.exist(resetToken, 'resetToken should not be returned when generatePasswordResetToken fails')
+        done()
+      })
+    })
+  })
+
+
   it('changePassword should be functional', function(done) {
     backend.register(userData, function(err, user) {
       if (err) {
