@@ -206,7 +206,7 @@ module.exports = function(backend, cb) {
             should.not.exist(err, 'error authenticating user with new password')
             should.exist(authenticatedUser, 'user object not returned from authenticate after changing password')
             backend.authenticate(userData, function(err, authenticatedUser) {
-              should.exist(err, 'user should not be able to authenticate with old password')
+              should.not.exist(err, 'error trying to authenticate with old password')
               should.not.exist(authenticatedUser, 'user object should not be returned when authenticate called with old password')
               done()
             })
