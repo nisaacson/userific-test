@@ -251,7 +251,7 @@ module.exports = function(backend, cb) {
     })
   })
 
-  it('resetPassword should be functional for valid reset tokens', function(done) {
+  it('resetPassword should be give error for invalid reset tokens', function(done) {
     backend.register(userData, function(err, user) {
       if (err) {
         inspect(err, 'error registering user')
