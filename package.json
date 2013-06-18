@@ -1,6 +1,6 @@
 {
   "name": "userific-test",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Test suite for any userific backend ",
   "main": "index.js",
   "directories": {
