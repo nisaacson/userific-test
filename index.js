@@ -53,7 +53,6 @@ module.exports = function(backend, cb) {
           inspect(err, 'error confirming user')
         }
         should.not.exist(err, 'error confirming user')
-        err.reason.should.eql('unconfirmed')
         should.exist(confirmedUser, 'user object should be returned when confirmEmail succeeds')
         should.not.exist(confirmedUser.password, 'password should not be returned in user object')
         done()
