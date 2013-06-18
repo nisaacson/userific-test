@@ -121,33 +121,44 @@ module.exports = function(backend, cb) {
       should.not.exist(err, 'error registering user')
       should.exist(user)
       user.email.should.eql(userData.email, 'user object has incorrect email')
-      var newEmail = 'newEmail@example.com'
-      newEmail.should.not.eql(userData.email)
-      var changeData = {
-        currentEmail: userData.email,
-        newEmail: newEmail
-      }
-      backend.changeEmail(changeData, function(err, userWithNewEmail) {
-        if (err) {
-          inspect(err, 'error in changeEmail')
-        }
-        should.not.exist(err, 'error authenticating user')
-        should.exist(userWithNewEmail, 'user object not returned from changeEmail')
-        userWithNewEmail.email.should.eql(newEmail, 'user has incorrect email after changeEmail')
-        var authData = {
-          email: userWithNewEmail.email,
-          password: userData.password
-        }
 
-        should.not.exist(userWithNewEmail.password, 'password should never be returned to client')
-        backend.authenticate(authData, function(err, authenticatedUser) {
+      var confirmData = {
+        confirmToken: user.confirmToken
+      }
+      backend.confirmEmail(confirmData, function(err, confirmedUser) {
+        if (err) {
+          inspect(err, 'error confirming user')
+        }
+        should.not.exist(err, 'error confirming user')
+        should.exist(confirmedUser, 'user object should be returned when confirmEmail succeeds')
+        var newEmail = 'newEmail@example.com'
+        newEmail.should.not.eql(userData.email)
+        var changeData = {
+          currentEmail: userData.email,
+          newEmail: newEmail
+        }
+        backend.changeEmail(changeData, function(err, userWithNewEmail) {
           if (err) {
-            inspect(err, 'error in authenticate')
+            inspect(err, 'error in changeEmail')
           }
-          should.not.exist(err, 'error authenticating user with new email')
-          should.exist(authenticatedUser, 'user object not returned from authenticate after changing email')
-          authenticatedUser.email.should.eql(newEmail, 'user object returned from authenticated has incorrect email')
-          done()
+          should.not.exist(err, 'error authenticating user')
+          should.exist(userWithNewEmail, 'user object not returned from changeEmail')
+          userWithNewEmail.email.should.eql(newEmail, 'user has incorrect email after changeEmail')
+          var authData = {
+            email: userWithNewEmail.email,
+            password: userData.password
+          }
+
+          should.not.exist(userWithNewEmail.password, 'password should never be returned to client')
+          backend.authenticate(authData, function(err, authenticatedUser) {
+            if (err) {
+              inspect(err, 'error in authenticate')
+            }
+            should.not.exist(err, 'error authenticating user with new email')
+            should.exist(authenticatedUser, 'user object not returned from authenticate after changing email')
+            authenticatedUser.email.should.eql(newEmail, 'user object returned from authenticated has incorrect email')
+            done()
+          })
         })
       })
     })
@@ -161,34 +172,44 @@ module.exports = function(backend, cb) {
       should.not.exist(err, 'error registering user')
       should.exist(user)
       user.email.should.eql(userData.email, 'user object has incorrect email')
-      var newPassword = 'newPassword@example.com'
-      newPassword.should.not.eql(userData.password)
-      var changeData = {
-        email: userData.email,
-        currentPassword: userData.password,
-        newPassword: newPassword
+      var confirmData = {
+        confirmToken: user.confirmToken
       }
-      backend.changePassword(changeData, function(err, userWithNewPassword) {
+      backend.confirmEmail(confirmData, function(err, confirmedUser) {
         if (err) {
-          inspect(err, 'error in changePassword')
+          inspect(err, 'error confirming user')
         }
-        should.not.exist(err, 'error authenticating user')
-        should.exist(userWithNewPassword, 'user object not returned from changePassword')
-        should.not.exist(userWithNewPassword.password, 'password should never be returned to client')
-        var authData = {
+        should.not.exist(err, 'error confirming user')
+        should.exist(confirmedUser, 'user object should be returned when confirmEmail succeeds')
+        var newPassword = 'newPassword@example.com'
+        newPassword.should.not.eql(userData.password)
+        var changeData = {
           email: userData.email,
-          password: newPassword
+          currentPassword: userData.password,
+          newPassword: newPassword
         }
-        backend.authenticate(authData, function(err, authenticatedUser) {
+        backend.changePassword(changeData, function(err, userWithNewPassword) {
           if (err) {
-            inspect(err, 'error in authenticate')
+            inspect(err, 'error in changePassword')
           }
-          should.not.exist(err, 'error authenticating user with new password')
-          should.exist(authenticatedUser, 'user object not returned from authenticate after changing password')
-          backend.authenticate(userData, function(err, authenticatedUser) {
-            should.exist(err, 'user should not be able to authenticate with old password')
-            should.not.exist(authenticatedUser, 'user object should not be returned when authenticate called with old password')
-            done()
+          should.not.exist(err, 'error authenticating user')
+          should.exist(userWithNewPassword, 'user object not returned from changePassword')
+          should.not.exist(userWithNewPassword.password, 'password should never be returned to client')
+          var authData = {
+            email: userData.email,
+            password: newPassword
+          }
+          backend.authenticate(authData, function(err, authenticatedUser) {
+            if (err) {
+              inspect(err, 'error in authenticate')
+            }
+            should.not.exist(err, 'error authenticating user with new password')
+            should.exist(authenticatedUser, 'user object not returned from authenticate after changing password')
+            backend.authenticate(userData, function(err, authenticatedUser) {
+              should.exist(err, 'user should not be able to authenticate with old password')
+              should.not.exist(authenticatedUser, 'user object should not be returned when authenticate called with old password')
+              done()
+            })
           })
         })
       })
