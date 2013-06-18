@@ -210,6 +210,46 @@ module.exports = function(backend, cb) {
     })
   })
 
+  it('resetPassword should be functional for valid reset tokens', function(done) {
+    backend.register(userData, function(err, user) {
+      if (err) {
+        inspect(err, 'error registering user')
+      }
+      should.not.exist(err, 'error registering user')
+      should.exist(user)
+      user.email.should.eql(userData.email, 'user object has incorrect email')
+      var confirmData = {
+        confirmToken: user.confirmToken
+      }
+      backend.confirmEmail(confirmData, function(err, confirmedUser) {
+        should.not.exist(err, 'should get not get error when confirming user with valid confirmToken')
+        should.exist(confirmedUser, 'user object should be returned when confirmEmail succeeds')
+        var generateData = {
+          email: user.email
+        }
+        backend.generatePasswordResetToken(generateData, function(err, resetToken) {
+          should.not.exist(err, 'error generating reset token: ' + JSON.stringify(err))
+          should.exist(resetToken, 'resetToken should be returned as second parameter to callback')
+          var resetData = {
+            resetToken: resetToken
+          }
+          backend.resetPassword(resetData, function(err, newPassword) {
+            should.not.exist(err, 'error reseting password: ' + JSON.stringify(err))
+            should.exist(newPassword, 'new raw password not returned from resetPassword')
+            var authData = {
+              email: userData.email,
+              password: newPassword
+            }
+            backend.authenticate(authData, function(err, authenticatedUser) {
+              should.not.exist(err, 'should be able to authenticate with new password')
+              should.exist(authenticatedUser, 'authenticate should return valid user with using new reset password')
+              done()
+            })
+          })
+        })
+      })
+    })
+  })
 
   it('changePassword should be functional', function(done) {
     backend.register(userData, function(err, user) {
