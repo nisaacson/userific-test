@@ -106,7 +106,7 @@ module.exports = function(backend, cb) {
       }
       backend.confirmEmail(confirmData, function(err, confirmedUser) {
         should.exist(err, 'should get error when confirming user with invalid confirmToken user')
-        err.reason.should.eql('unconfirmed')
+        err.reason.should.eql('token not found')
         should.not.exist(confirmedUser, 'user object should not be returned when confirmEmail fails')
         done()
       })
