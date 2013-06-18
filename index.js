@@ -1,5 +1,6 @@
 var inspect = require('eyespect').inspector()
 var should = require('should')
+var assert = require('assert')
 module.exports = function(backend, cb) {
   var userData = {
     email: 'foo@example.com',
@@ -14,11 +15,13 @@ module.exports = function(backend, cb) {
       should.exist(user)
       user.email.should.eql(userData.email, 'user object has incorrect email')
       should.not.exist(user.password, 'password should never be returned to client')
+      assert.ok(!user.confirmed, 'user should not be confirmed after registering')
+      should.exist(user.confirmToken, 'confirmToken should be returned in user object after registering')
       done()
     })
   })
 
-  it('should register new user then authenticate them', function(done) {
+  it('should not authenticate unconfirmed user', function(done) {
     backend.register(userData, function(err, user) {
       if (err) {
         inspect(err, 'error registering user')
@@ -27,13 +30,86 @@ module.exports = function(backend, cb) {
       should.exist(user)
       user.email.should.eql(userData.email, 'user object has incorrect email')
       backend.authenticate(userData, function(err, authenticatedUser) {
+        should.exist(err, 'should get error when trying authenticate unconfirmed user')
+        err.reason.should.eql('unconfirmed', 'error reason should be "unconfirmed"')
+        done()
+      })
+    })
+  })
+
+  it('should confirm new user', function(done) {
+    backend.register(userData, function(err, user) {
+      if (err) {
+        inspect(err, 'error registering user')
+      }
+      should.not.exist(err, 'error registering user')
+      should.exist(user)
+      user.email.should.eql(userData.email, 'user object has incorrect email')
+      var confirmData = {
+        confirmToken: user.confirmToken
+      }
+      backend.confirmEmail(confirmData, function(err, confirmedUser) {
         if (err) {
-          inspect(err, 'error authenticating user')
+          inspect(err, 'error confirming user')
         }
-        should.not.exist(err, 'error authenticating user')
-        should.exist(authenticatedUser)
-        should.not.exist(authenticatedUser.password, 'password should never be returned to client')
-        authenticatedUser.email.should.eql(userData.email, 'authenticated user has incorrect email')
+        should.not.exist(err, 'error confirming user')
+        err.reason.should.eql('unconfirmed')
+        should.exist(confirmedUser, 'user object should be returned when confirmEmail succeeds')
+        should.not.exist(confirmedUser.password, 'password should not be returned in user object')
+        done()
+      })
+    })
+  })
+
+  it('should authenticate confirmed user', function(done) {
+    backend.register(userData, function(err, user) {
+      if (err) {
+        inspect(err, 'error registering user')
+      }
+      should.not.exist(err, 'error registering user')
+      should.exist(user)
+      user.email.should.eql(userData.email, 'user object has incorrect email')
+      var confirmData = {
+        confirmToken: user.confirmToken
+      }
+      backend.confirmEmail(confirmData, function(err, confirmedUser) {
+        if (err) {
+          inspect(err, 'error confirming user')
+        }
+        should.not.exist(err, 'error confirming user')
+        err.reason.should.eql('unconfirmed')
+        should.exist(confirmedUser, 'user object should be returned when confirmEmail succeeds')
+        should.not.exist(confirmedUser.password, 'password should not be returned in user object')
+        backend.authenticate(userData, function(err, authenticatedUser) {
+          if (err) {
+            inspect(err, 'error authenticating user')
+          }
+          should.not.exist(err, 'authenticate should complete correctly')
+          should.exist(authenticatedUser, 'user object should be returned when authenticate succeeds')
+          should.not.exist(authenticatedUser.password, 'password should not be returned to client when authenticating user')
+          done()
+        })
+      })
+    })
+  })
+
+  it('should not confirm email with invalid confirmToken', function(done) {
+    backend.register(userData, function(err, user) {
+      if (err) {
+        inspect(err, 'error registering user')
+      }
+      should.not.exist(err, 'error registering user')
+      should.exist(user)
+      user.email.should.eql(userData.email, 'user object has incorrect email')
+      var fakeConfirmToken = 'foobar'
+      fakeConfirmToken.should.not.eql(user.confirmToken)
+      var confirmData = {
+        confirmToken: fakeConfirmToken
+      }
+      backend.confirmEmail(confirmData, function(err, confirmedUser) {
+        should.exist(err, 'should get error when confirming user with invalid confirmToken user')
+        err.reason.should.eql('unconfirmed')
+        should.not.exist(confirmedUser, 'user object should not be returned when confirmEmail fails')
         done()
       })
     })
