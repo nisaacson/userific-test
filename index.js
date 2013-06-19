@@ -181,9 +181,12 @@ module.exports = function(backend, cb) {
         var generateData = {
           email: user.email
         }
-        backend.generatePasswordResetToken(generateData, function(err, resetToken) {
+        backend.generatePasswordResetToken(generateData, function(err, resetUser) {
           should.not.exist(err, 'error generating reset token: ' + JSON.stringify(err))
-          should.exist(resetToken, 'resetToken should be returned as second parameter to callback')
+          should.exist(resetUser, 'user should be returned as second parameter to callback')
+          should.exist(resetUser.resetToken, 'resetToken field should exist in user parameter')
+          should.exist(resetUser._id, '_id field should exist in user parameter')
+          should.exist(resetUser.email, '_id field should exist in user parameter')
           done()
         })
       })
@@ -201,10 +204,10 @@ module.exports = function(backend, cb) {
       var generateData = {
         email: user.email
       }
-      backend.generatePasswordResetToken(generateData, function(err, resetToken) {
+      backend.generatePasswordResetToken(generateData, function(err, resetUser) {
         should.exist(err, 'should get error when generating reset token for unconfirmed account')
         err.reason.should.eql('unconfirmed')
-        should.not.exist(resetToken, 'resetToken should not be returned when generatePasswordResetToken fails')
+        should.not.exist(resetUser, 'resetToken should not be returned when generatePasswordResetToken fails')
         done()
       })
     })
@@ -227,9 +230,10 @@ module.exports = function(backend, cb) {
         var generateData = {
           email: user.email
         }
-        backend.generatePasswordResetToken(generateData, function(err, resetToken) {
+        backend.generatePasswordResetToken(generateData, function(err, resetUser) {
           should.not.exist(err, 'error generating reset token: ' + JSON.stringify(err))
-          should.exist(resetToken, 'resetToken should be returned as second parameter to callback')
+          var resetToken = resetUser.resetToken
+          should.exist(resetToken, 'resetToken should be exist in user object passed as second parameter to callback')
           var resetData = {
             resetToken: resetToken
           }
@@ -268,10 +272,11 @@ module.exports = function(backend, cb) {
         var generateData = {
           email: user.email
         }
-        backend.generatePasswordResetToken(generateData, function(err, resetToken) {
+        backend.generatePasswordResetToken(generateData, function(err, resetUser) {
           should.not.exist(err, 'error generating reset token: ' + JSON.stringify(err))
-          should.exist(resetToken, 'resetToken should be returned as second parameter to callback')
+          should.exist(resetUser.resetToken, 'resetToken should be returned as second parameter to callback')
           var fakeResetToken = 'fooResetToken'
+          var resetToken = resetUser.resetToken
           fakeResetToken.should.not.eql(resetToken, 'fake reset token must be different then actual reset token')
           var resetData = {
             resetToken: fakeResetToken
