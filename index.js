@@ -20,6 +20,24 @@ module.exports = function(backend, cb) {
       done()
     })
   })
+  it('should give err.reason = "email_taken" when registering duplicate email address', function(done) {
+    backend.register(userData, function(err, user) {
+      if (err) {
+        inspect(err, 'error registering user')
+      }
+      should.not.exist(err)
+      should.exist(user)
+      user.email.should.eql(userData.email, 'user object has incorrect email')
+      should.not.exist(user.password, 'password should never be returned to client')
+      assert.ok(!user.confirmed, 'user should not be confirmed after registering')
+      should.exist(user.confirmToken, 'confirmToken should be returned in user object after registering')
+      backend.register(userData, function(err, user) {
+      should.exist(err)
+      err.reason.should.eql('email_taken', 'err.reason should be set correctly')
+      should.not.exist(user)
+      done()
+    })
+  })
 
   it('should not authenticate unconfirmed user', function(done) {
     backend.register(userData, function(err, user) {
@@ -106,7 +124,7 @@ module.exports = function(backend, cb) {
       }
       backend.confirmEmail(confirmData, function(err, confirmedUser) {
         should.exist(err, 'should get error when confirming user with invalid confirmToken user')
-        err.reason.should.eql('token not found')
+        err.reason.should.eql('invalid_token')
         should.not.exist(confirmedUser, 'user object should not be returned when confirmEmail fails')
         done()
       })
@@ -283,7 +301,7 @@ module.exports = function(backend, cb) {
           }
           backend.resetPassword(resetData, function(err, newPassword) {
             should.exist(err, 'should give error when resetToken is wrong')
-            err.reason.should.eql('reset_token_not_found', 'error.reason should be "reset_token_not_found" for invalid resetToken')
+            err.reason.should.eql('invalid_token', 'error.reason should be "reset_token_not_found" for invalid resetToken')
             should.not.exist(newPassword, 'new raw password should not be returned from resetPassword if resetToken is wrong')
             done()
           })
@@ -343,4 +361,4 @@ module.exports = function(backend, cb) {
       })
     })
   })
-}
+})
