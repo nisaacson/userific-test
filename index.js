@@ -1,7 +1,8 @@
 var inspect = require('eyespect').inspector()
 var should = require('should')
 var assert = require('assert')
-module.exports = function(backend, cb) {
+
+module.exports = function tests(backend, cb) {
   var userData = {
     email: 'foo@example.com',
     password: 'barPassword'
@@ -32,10 +33,11 @@ module.exports = function(backend, cb) {
       assert.ok(!user.confirmed, 'user should not be confirmed after registering')
       should.exist(user.confirmToken, 'confirmToken should be returned in user object after registering')
       backend.register(userData, function(err, user) {
-      should.exist(err)
-      err.reason.should.eql('email_taken', 'err.reason should be set correctly')
-      should.not.exist(user)
-      done()
+        should.exist(err)
+        err.reason.should.eql('email_taken', 'err.reason should be set correctly')
+        should.not.exist(user)
+        done()
+      })
     })
   })
 
@@ -361,4 +363,5 @@ module.exports = function(backend, cb) {
       })
     })
   })
-})
+}
+
