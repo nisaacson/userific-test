@@ -33,7 +33,8 @@ module.exports = function tests(backend, cb) {
       assert.ok(!user.confirmed, 'user should not be confirmed after registering')
       should.exist(user.confirmToken, 'confirmToken should be returned in user object after registering')
       backend.register(userData, function(err, user) {
-        should.exist(err)
+        should.exist(err, 'should get error when registering duplication email addresses')
+        should.exist(err.reason, 'error should have reason field set')
         err.reason.should.eql('email_taken', 'err.reason should be set correctly')
         should.not.exist(user)
         done()
